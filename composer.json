@@ -1,0 +1,30 @@
+{
+  "name"        : "timiki/rpc-client",
+  "description" : "Simple JSON-RPC client",
+  "keywords"    : [
+    "rpc",
+    "json-rpc"
+  ],
+  "license"     : "MIT",
+  "branches"    : [
+    "master"
+  ],
+  "tags"        : [
+    "1.0.0"
+  ],
+  "authors"     : [
+    {
+      "name"  : "Netesin N",
+      "email" : "nikita@netesin.ru"
+    }
+  ],
+  "require"     : {
+    "php"      : ">=5.5",
+    "ext-curl" : "*"
+  },
+  "autoload"    : {
+    "psr-4" : {
+      "Timiki\\RpcClient\\" : "src/"
+    }
+  }
+}

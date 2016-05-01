@@ -85,6 +85,48 @@ class JsonResponse
 	}
 
 	/**
+	 * Get error code
+	 *
+	 * @return string|null
+	 */
+	public function getErrorCode()
+	{
+		if ($error = $this->getError()) {
+			return array_key_exists('code', $error) ? $error['code'] : null;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get error message
+	 *
+	 * @return string|null
+	 */
+	public function getErrorMessage()
+	{
+		if ($error = $this->getError()) {
+			return array_key_exists('message', $error) ? $error['message'] : null;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get error data
+	 *
+	 * @return string|null
+	 */
+	public function getErrordata()
+	{
+		if ($error = $this->getError()) {
+			return array_key_exists('data', $error) ? $error['data'] : null;
+		}
+
+		return null;
+	}
+
+	/**
 	 * Get result
 	 *
 	 * @return mixed|null

@@ -197,7 +197,7 @@ class Client
 	 * @param string  $method
 	 * @param array   $params
 	 * @param integer $id
-	 * @return JsonResponse
+	 * @return JsonResponse|null
 	 */
 	public function call($method, array $params = [], $id = null)
 	{
@@ -208,6 +208,10 @@ class Client
 		$body         = json_encode(['jsonrpc' => '2.0', 'method' => $method, 'params' => $params, 'id' => $id]);
 		$curl         = new Http();
 		$httpResponse = $curl->post($this->getAddressForRequest(), $body, $headers, $cookies);
+
+		if (empty($httpResponse->getBody())) {
+			return null;
+		}
 
 		return new JsonResponse($httpResponse);
 	}

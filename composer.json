@@ -1,17 +1,12 @@
 {
   "name"        : "timiki/rpc-client",
-  "description" : "Simple JSON-RPC client",
+  "type"        : "library",
+  "description" : "Simple HTTP JSON-RPC client",
   "keywords"    : [
     "rpc",
     "json-rpc"
   ],
   "license"     : "MIT",
-  "branches"    : [
-    "master"
-  ],
-  "tags"        : [
-    "1.0.0"
-  ],
   "authors"     : [
     {
       "name"  : "Netesin N",
@@ -19,8 +14,8 @@
     }
   ],
   "require"     : {
-    "php"      : ">=5.5|>=7.0",
-    "ext-curl" : "*"
+    "php"               : ">=5.5|>=7.0",
+    "guzzlehttp/guzzle" : "^6.2"
   },
   "autoload"    : {
     "psr-4" : {

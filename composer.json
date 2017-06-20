@@ -1,25 +1,25 @@
 {
-  "name"        : "timiki/rpc-client",
-  "type"        : "library",
-  "description" : "Simple HTTP JSON-RPC client",
-  "keywords"    : [
+  "name"       : "timiki/rpc-client",
+  "type"       : "library",
+  "description": "Simple HTTP JSON-RPC client",
+  "keywords"   : [
     "rpc",
     "json-rpc"
   ],
-  "license"     : "MIT",
-  "authors"     : [
+  "license"    : "MIT",
+  "authors"    : [
     {
-      "name"  : "Netesin N",
-      "email" : "nikita@netesin.ru"
+      "name" : "Netesin N",
+      "email": "nikita@netesin.ru"
     }
   ],
-  "require"     : {
-    "php"               : ">=5.5 || >=7.0",
-    "guzzlehttp/guzzle" : "^6.2"
+  "require"    : {
+    "php"              : ">=5.5 || >=7.0",
+    "guzzlehttp/guzzle": "^6.2"
   },
-  "autoload"    : {
-    "psr-4" : {
-      "Timiki\\RpcClient\\" : "src/"
+  "autoload"   : {
+    "psr-4": {
+      "Timiki\\RpcClient\\": "src/"
     }
   }
 }

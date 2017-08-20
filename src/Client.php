@@ -4,6 +4,10 @@ namespace Timiki\RpcClient;
 
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Psr7\Request as HttpRequest;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Timiki\RpcCommon\JsonRequest;
+use Timiki\RpcCommon\JsonResponse;
+use Timiki\Bundle\RpcServerBundle\Event;
 
 /**
  * Light Http RPC client
@@ -11,13 +15,6 @@ use GuzzleHttp\Psr7\Request as HttpRequest;
 class Client
 {
     const VERSION = '2.0';
-
-    /**
-     * Internal ids count.
-     *
-     * @var integer
-     */
-    protected static $ids = 0;
 
     /**
      * Server address.
@@ -34,13 +31,22 @@ class Client
     protected $httpClient;
 
     /**
+     * Event dispatcher.
+     *
+     * @var EventDispatcherInterface|null
+     */
+    protected $eventDispatcher;
+
+    /**
      * Client constructor.
      *
      * @param string|array $address RPC server address string or array
+     * @param EventDispatcherInterface|null $eventDispatcher
      */
-    public function __construct($address)
+    public function __construct($address, EventDispatcherInterface $eventDispatcher = null)
     {
         $this->setAddress($address);
+        $this->setEventDispatcher($eventDispatcher);
         $this->httpClient = new HttpClient(['cookies' => true, 'verify' => false]);
     }
 
@@ -52,7 +58,20 @@ class Client
      */
     public function setAddress($address)
     {
-        $this->address = (array)$address;
+        $this->address = is_string($address) ? explode(',', $address) : (array)$address;
+
+        return $this;
+    }
+
+    /**
+     * Set event dispatcher.
+     *
+     * @param EventDispatcherInterface|null $eventDispatcher
+     * @return $this
+     */
+    public function setEventDispatcher(EventDispatcherInterface $eventDispatcher = null)
+    {
+        $this->eventDispatcher = $eventDispatcher;
 
         return $this;
     }
@@ -71,7 +90,7 @@ class Client
      * Execute one RPC method without response.
      *
      * @param string $method
-     * @param array  $params
+     * @param array $params
      *
      * @return void
      */
@@ -86,13 +105,17 @@ class Client
      * Execute one RPC method.
      *
      * @param string $method
-     * @param array  $params
+     * @param array $params
      *
      * @return JsonResponse|null
      */
     public function call($method, array $params = [])
     {
-        $request = new JsonRequest($method, $params, ++self::$ids);
+        $request = new JsonRequest(
+            $method,
+            $params,
+            uniqid(gethostname().'.', true)
+        );
 
         return $this->execute($request);
     }
@@ -122,12 +145,12 @@ class Client
          */
         $createJsonResponse = function ($json) {
 
-            $id     = null;
+            $id = null;
             $result = null;
-            $error  = [
-                'code'    => null,
+            $error = [
+                'code' => null,
                 'message' => null,
-                'data'    => null,
+                'data' => null,
             ];
 
             if (
@@ -139,13 +162,13 @@ class Client
                 )
             ) {
 
-                $id     = $json['id'];
+                $id = $json['id'];
                 $result = array_key_exists('result', $json) ? $json['result'] : null;
 
                 if (array_key_exists('error', $json)) {
-                    $error['code']    = array_key_exists('code', $json['error']) ? $json['error']['code'] : null;
+                    $error['code'] = array_key_exists('code', $json['error']) ? $json['error']['code'] : null;
                     $error['message'] = array_key_exists('message', $json['error']) ? $json['error']['message'] : null;
-                    $error['data']    = array_key_exists('data', $json['error']) ? $json['error']['data'] : null;
+                    $error['data'] = array_key_exists('data', $json['error']) ? $json['error']['data'] : null;
                 }
 
                 $response = new JsonResponse();
@@ -159,23 +182,17 @@ class Client
                 return $response;
 
             } else {
-
                 throw new Exceptions\InvalidResponseException('Invalid response format from RPC server.');
-
             }
 
         };
 
         if (array_keys($json) === range(0, count($json) - 1)) {
-
             foreach ($json as $part) {
                 $response[] = $createJsonResponse($part);
             }
-
         } else {
-
             $response = $createJsonResponse($json);
-
         }
 
         return $response;
@@ -203,7 +220,20 @@ class Client
             throw new Exceptions\InvalidRequestException('$request must instance of JsonRequest');
         }
 
+        $address = count($this->address) === 1 ? $this->address[0] : $this->address[rand(0, count($this->address))];
         $isNeedResponse = true;
+
+        if ($this->eventDispatcher) {
+
+            $event = $this->eventDispatcher->dispatch(
+                Event\JsonRequestEvent::EVENT,
+                new Event\JsonRequestEvent($request, $address)
+            );
+
+            if ($event->isPropagationStopped()) {
+                return null;
+            }
+        }
 
         if (is_array($request)) {
             $requestHeaders = [];
@@ -219,33 +249,22 @@ class Client
         }
 
         // Default requestHeaders
-        $requestHeaders['user-agent']   = array_key_exists('user-agent', $requestHeaders)
+        $requestHeaders['user-agent'] = array_key_exists('user-agent', $requestHeaders)
             ? $requestHeaders['user-agent'] : 'JSON-RPC client '.self::VERSION.'.'.PHP_VERSION;
 
         $requestHeaders['content-type'] = 'application/json';
 
         if (empty($this->address)) {
-
             throw new Exceptions\ConnectionException('Must be set rpc server address');
-
         }
 
-        // If set more than one rpc server address, select random for request
-        $address = count($this->address) === 1
-            ? $this->address[0] : $this->address[rand(0, count($this->address))];
-
-        $httpRequest = new HttpRequest('POST', $address, $requestHeaders, json_encode($request));
+        $httpRequest = new HttpRequest('POST', trim($address), $requestHeaders, json_encode($request));
 
         try {
-
             // Try send request to RPC server
-
             $httpResponse = $this->httpClient->send($httpRequest);
-
         } catch (\Exception $e) {
-
             throw new Exceptions\ConnectionException($e->getMessage());
-
         }
 
         if (!$isNeedResponse) {
@@ -277,6 +296,13 @@ class Client
             }
         } else {
             $request->setResponse($response);
+        }
+
+        if ($this->eventDispatcher) {
+            $this->eventDispatcher->dispatch(
+                Event\JsonResponseEvent::EVENT,
+                new Event\JsonResponseEvent($response, $address)
+            );
         }
 
         return $response;

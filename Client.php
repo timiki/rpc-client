@@ -91,12 +91,14 @@ class Client
      *
      * @param string $method
      * @param array $params
+     * @param array $headers
      *
      * @return void
      */
-    public function notice($method, array $params = [])
+    public function notice($method, array $params = [], array $headers = [])
     {
         $request = new JsonRequest($method, $params);
+        $request->headers()->add((array)$headers);
 
         $this->execute($request);
     }
@@ -106,16 +108,14 @@ class Client
      *
      * @param string $method
      * @param array $params
+     * @param array $headers
      *
      * @return JsonResponse|null
      */
-    public function call($method, array $params = [])
+    public function call($method, array $params = [], array $headers = [])
     {
-        $request = new JsonRequest(
-            $method,
-            $params,
-            uniqid(gethostname().'.', true)
-        );
+        $request = new JsonRequest($method, $params, uniqid(gethostname().'.', true));
+        $request->headers()->add((array)$headers);
 
         return $this->execute($request);
     }

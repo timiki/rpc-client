@@ -7,7 +7,6 @@ use GuzzleHttp\Psr7\Request as HttpRequest;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Timiki\RpcCommon\JsonRequest;
 use Timiki\RpcCommon\JsonResponse;
-use Timiki\Bundle\RpcServerBundle\Event;
 
 /**
  * Light Http RPC client

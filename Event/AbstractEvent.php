@@ -1,6 +1,6 @@
 <?php
 
-namespace Timiki\Bundle\RpcServerBundle\Event;
+namespace Timiki\RpcClient\Event;
 
 use Symfony\Component\EventDispatcher\Event;
 

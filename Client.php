@@ -3,6 +3,7 @@
 namespace Timiki\RpcClient;
 
 use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Psr7\Request as HttpRequest;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Timiki\RpcCommon\JsonRequest;
@@ -99,7 +100,11 @@ class Client
         $request = new JsonRequest($method, $params);
         $request->headers()->add((array)$headers);
 
-        $this->execute($request);
+        try {
+            $this->execute($request);
+        } catch (\Exception $e) {
+            // Nothing
+        }
     }
 
     /**
@@ -116,7 +121,29 @@ class Client
         $request = new JsonRequest($method, $params, uniqid(gethostname().'.', true));
         $request->headers()->add((array)$headers);
 
-        return $this->execute($request);
+        try {
+            return $this->execute($request);
+        } catch (\Exception $e) {
+            return $this->createResponseFromException($e, $request);
+        }
+    }
+
+    /**
+     * Create response from exception and request.
+     *
+     * @param \Exception $e
+     * @param JsonRequest $request
+     * @return JsonResponse
+     */
+    protected function createResponseFromException(\Exception $e, JsonRequest $request)
+    {
+        $response = new JsonResponse();
+        $response->setId($request->getId());
+
+        $response->setErrorMessage($e->getMessage());
+        $response->setErrorCode($e->getCode());
+
+        return $response;
     }
 
     /**
@@ -260,10 +287,15 @@ class Client
         $httpRequest = new HttpRequest('POST', trim($address), $requestHeaders, json_encode($request));
 
         try {
-            // Try send request to RPC server
             $httpResponse = $this->httpClient->send($httpRequest);
+            $response = $this->parserHttp($httpResponse->getBody()->getContents());
         } catch (\Exception $e) {
-            throw new Exceptions\ConnectionException($e->getMessage());
+            if ($e instanceof ServerException) {
+                $httpResponse = $e->getResponse();
+                $response = $this->parserHttp($e->getResponse()->getBody()->getContents());
+            } else {
+                throw new Exceptions\ConnectionException($e->getMessage());
+            }
         }
 
         if (!$isNeedResponse) {
@@ -271,7 +303,9 @@ class Client
         }
 
         // JsonResponse
-        $response = $this->parserHttp($httpResponse->getBody()->getContents());
+//        $response = $this->parserHttp($httpResponse->getBody()->getContents());
+
+//        die();
 
         // Set response headers
         if (is_array($response)) {

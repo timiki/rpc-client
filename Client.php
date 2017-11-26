@@ -14,7 +14,7 @@ use Timiki\RpcCommon\JsonResponse;
  */
 class Client
 {
-    const VERSION = '2.0';
+    const VERSION = '3.0.6';
 
     /**
      * Server address.
@@ -276,9 +276,12 @@ class Client
 
         // Default requestHeaders
         $requestHeaders['user-agent'] = array_key_exists('user-agent', $requestHeaders)
-            ? $requestHeaders['user-agent'] : 'JSON-RPC client '.self::VERSION.'.'.PHP_VERSION;
+            ? $requestHeaders['user-agent'] : 'JSON-RPC client/'.self::VERSION.'/'.PHP_VERSION;
 
         $requestHeaders['content-type'] = 'application/json';
+        $requestHeaders['accept'] = 'application/json';
+        $requestHeaders['cache-control'] = 'no-cache';
+        $requestHeaders['connection'] = 'close';
 
         if (empty($this->address)) {
             throw new Exceptions\ConnectionException('Must be set rpc server address');

@@ -284,7 +284,12 @@ class Client
             throw new Exceptions\ConnectionException('Must be set rpc server address');
         }
 
-        $httpRequest = new HttpRequest('POST', trim($address), $requestHeaders, json_encode($request));
+        $httpRequest = new HttpRequest(
+            'POST',
+            trim($address),
+            $requestHeaders,
+            json_encode($request, JSON_UNESCAPED_UNICODE)
+        );
 
         try {
             $httpResponse = $this->httpClient->send($httpRequest);

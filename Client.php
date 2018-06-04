@@ -298,22 +298,12 @@ class Client
             $httpResponse = $this->httpClient->send($httpRequest);
             $response = $this->parserHttp($httpResponse->getBody()->getContents());
         } catch (\Exception $e) {
-            if ($e instanceof ServerException) {
-                $httpResponse = $e->getResponse();
-                $response = $this->parserHttp($e->getResponse()->getBody()->getContents());
-            } else {
-                throw new Exceptions\ConnectionException($e->getMessage());
-            }
+            throw new Exceptions\ConnectionException($e->getMessage());
         }
 
         if (!$isNeedResponse) {
             return null;
         }
-
-        // JsonResponse
-//        $response = $this->parserHttp($httpResponse->getBody()->getContents());
-
-//        die();
 
         // Set response headers
         if (is_array($response)) {

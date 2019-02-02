@@ -15,7 +15,7 @@ class JsonRequestEvent extends AbstractEvent
 
     /**
      * @param JsonRequest|JsonRequest[] $jsonRequests
-     * @param string|null $address
+     * @param null|string               $address
      */
     public function __construct($jsonRequests, $address = null)
     {

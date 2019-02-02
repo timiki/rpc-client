@@ -7,12 +7,12 @@ use Symfony\Component\EventDispatcher\Event;
 abstract class AbstractEvent extends Event
 {
     /**
-     * @var string|null
+     * @var null|string
      */
     private $address;
 
     /**
-     * @param $address
+     * @param null|string $address
      */
     public function __construct($address = null)
     {
@@ -22,7 +22,7 @@ abstract class AbstractEvent extends Event
     /**
      * Get address.
      *
-     * @return string|null
+     * @return null|string
      */
     public function getAddress()
     {

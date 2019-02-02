@@ -1,26 +1,35 @@
 {
-  "name"       : "timiki/rpc-client",
-  "type"       : "library",
-  "description": "Simple HTTP JSON-RPC client",
-  "keywords"   : [
-    "rpc",
-    "json-rpc"
-  ],
-  "license"    : "MIT",
-  "authors"    : [
-    {
-      "name" : "Netesin N",
-      "email": "nikita@netesin.ru"
+    "name": "timiki/rpc-client",
+    "type": "library",
+    "description": "Simple HTTP JSON-RPC client",
+    "keywords": [
+        "rpc",
+        "json-rpc"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Netesin N",
+            "email": "nikita@netesin.ru"
+        }
+    ],
+    "require": {
+        "ext-json": "*",
+        "timiki/rpc-common": "^1.0",
+        "guzzlehttp/guzzle": "^6.2",
+        "symfony/event-dispatcher": "^3.3 || ^4.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.13",
+        "phpstan/phpstan": "^0.10.5",
+        "phpstan/phpstan-symfony": "^0.10.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Timiki\\RpcClient\\": "src"
+        }
+    },
+    "config": {
+        "bin-dir": "bin"
     }
-  ],
-  "require"    : {
-    "timiki/rpc-common"       : "^1.0",
-    "guzzlehttp/guzzle"       : "^6.2",
-    "symfony/event-dispatcher": "^3.3 || ^4.0"
-  },
-  "autoload"   : {
-    "psr-4": {
-      "Timiki\\RpcClient\\": ""
-    }
-  }
 }

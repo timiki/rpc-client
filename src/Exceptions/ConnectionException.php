@@ -5,7 +5,7 @@ namespace Timiki\RpcClient\Exceptions;
 use RuntimeException;
 
 /**
- * Connection exception
+ * Connection exception.
  */
 class ConnectionException extends RuntimeException
 {
@@ -19,4 +19,3 @@ class ConnectionException extends RuntimeException
         parent::__construct($message);
     }
 }
-

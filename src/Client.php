@@ -2,6 +2,7 @@
 
 namespace Timiki\RpcClient;
 
+use Doctrine\Common\Cache\Cache;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Psr7\Request as HttpRequest;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -9,11 +10,11 @@ use Timiki\RpcCommon\JsonRequest;
 use Timiki\RpcCommon\JsonResponse;
 
 /**
- * Light Http RPC client.
+ * Light JSON-RPC client.
  */
 class Client
 {
-    const VERSION = '3.1.0';
+    const VERSION = '3.2.0';
 
     /**
      * Server address.
@@ -46,18 +47,25 @@ class Client
     ];
 
     /**
+     * @var null|Cache
+     */
+    private $cache;
+
+    /**
      * Client constructor.
      *
      * @param array|string                  $address         RPC server address string or array
      * @param null|EventDispatcherInterface $eventDispatcher
      * @param array                         $options
+     * @param null|Cache                    $cache
      */
-    public function __construct($address, EventDispatcherInterface $eventDispatcher = null, $options = [])
+    public function __construct($address, EventDispatcherInterface $eventDispatcher = null, $options = [], Cache $cache = null)
     {
         $this->setAddress($address);
         $this->setEventDispatcher($eventDispatcher);
         $this->setOptions($options);
         $this->httpClient = new HttpClient(['cookies' => true, 'verify' => false]);
+        $this->cache = $cache;
     }
 
     /**
@@ -136,7 +144,7 @@ class Client
     }
 
     /**
-     * Execute one RPC method.
+     * Execute JSON-RPC method.
      *
      * @param string $method
      * @param array  $params
@@ -151,6 +159,46 @@ class Client
 
         try {
             return $this->execute($request);
+        } catch (\Exception $e) {
+            return $this->createResponseFromException($e, $request);
+        }
+    }
+
+    /**
+     * Execute JSON-RPC method with cache.
+     *
+     * @param string      $method
+     * @param array       $params
+     * @param null|string $key
+     * @param int         $lifetime
+     * @param array       $headers
+     *
+     * @throws \Exception
+     *
+     * @return null|JsonResponse
+     */
+    public function callWithCache($method, array $params = [], $key = null, $lifetime = 3600, array $headers = [])
+    {
+        if (!$this->cache) {
+            throw new \Exception('No set cache provider, set it in constructor');
+        }
+
+        if (empty($key)) {
+            $key = \md5(\json_encode($this->getAddress()).'-'.$method.'-'.\json_encode($params));
+        }
+
+        if ($this->cache->contains($key)) {
+            return \unserialize($this->cache->fetch($key));
+        }
+
+        $request = new JsonRequest($method, $params, \uniqid(\gethostname().'.', true));
+        $request->headers()->add($headers);
+
+        try {
+            $response = $this->execute($request);
+            $this->cache->save($key, \serialize($response), $lifetime);
+
+            return $response;
         } catch (\Exception $e) {
             return $this->createResponseFromException($e, $request);
         }
@@ -267,15 +315,15 @@ class Client
         if (\is_array($request)) {
             foreach ($request as $value) {
                 if (!$value instanceof JsonRequest) {
-                    throw new Exceptions\InvalidRequestException('$request must be array of JsonRequest objects');
+                    throw new Exceptions\InvalidRequestException('Request must be array of JsonRequest objects');
                 }
             }
         } elseif (!$request instanceof JsonRequest) {
-            throw new Exceptions\InvalidRequestException('$request must instance of JsonRequest');
+            throw new Exceptions\InvalidRequestException('Request must instance of JsonRequest');
         }
 
         $address = 1 === \count($this->address) ? $this->address[0] : $this->address[\rand(0, \count($this->address))];
-        $isNeedResponse = true;
+        $isNeedResponse = false;
 
         if ($this->eventDispatcher) {
             $event = $this->eventDispatcher->dispatch(
@@ -293,11 +341,11 @@ class Client
 
             foreach ($request as $value) {
                 $requestHeaders = \array_merge($requestHeaders, $value->headers()->all());
-                $isNeedResponse = empty($value->getId()) ? false : true;
+                $isNeedResponse = $isNeedResponse ? true : !empty($value->getId());
             }
         } else {
             $requestHeaders = $request->headers()->all();
-            $isNeedResponse = empty($request->getId()) ? false : true;
+            $isNeedResponse = !empty($request->getId());
         }
 
         // Default requestHeaders

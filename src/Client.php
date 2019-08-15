@@ -326,10 +326,7 @@ class Client
         $isNeedResponse = false;
 
         if ($this->eventDispatcher) {
-            $event = $this->eventDispatcher->dispatch(
-                Event\JsonRequestEvent::EVENT,
-                new Event\JsonRequestEvent($request, $address)
-            );
+            $event = $this->eventDispatcher->dispatch(new Event\JsonRequestEvent($request, $address));
 
             if ($event->isPropagationStopped()) {
                 return null;
@@ -405,10 +402,7 @@ class Client
         }
 
         if ($this->eventDispatcher) {
-            $this->eventDispatcher->dispatch(
-                Event\JsonResponseEvent::EVENT,
-                new Event\JsonResponseEvent($response, $address)
-            );
+            $this->eventDispatcher->dispatch(new Event\JsonResponseEvent($response, $address));
         }
 
         return $response;

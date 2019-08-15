@@ -6,8 +6,6 @@ use Timiki\RpcCommon\JsonResponse;
 
 class JsonResponseEvent extends AbstractEvent
 {
-    const EVENT = 'rpc.client.json.response';
-
     /**
      * @var JsonResponse
      */

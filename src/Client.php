@@ -43,7 +43,9 @@ class Client
      * @var array
      */
     private $options = [
-        'attempts_on_connection_error' => '10',
+        'attempts_on_error' => 10,
+        'attempts_on_response_error' => false,
+        'attempts_delay' => 1000,
     ];
 
     /**
@@ -285,6 +287,7 @@ class Client
 
                 return $response;
             }
+
             throw new Exceptions\InvalidResponseException('Invalid response format from RPC server.');
         };
 
@@ -305,6 +308,7 @@ class Client
      * @param JsonRequest|JsonRequest[] $request
      * @param int                       $attempt
      *
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      *
      * @return null|JsonResponse|JsonResponse[]
@@ -368,8 +372,16 @@ class Client
         try {
             $httpResponse = $this->httpClient->send($httpRequest);
             $response = $this->parserHttp($httpResponse->getBody()->getContents());
+
+            if ($response->isError() && $this->options['attempts_on_response_error'] && $attempt <= $this->options['attempts_on_error']) {
+                \usleep((int) $this->options['attempts_delay']);
+
+                return $this->execute($request, ++$attempt);
+            }
         } catch (\Exception $e) {
-            if ($attempt <= $this->options['attempts_on_connection_error']) {
+            if ($attempt <= $this->options['attempts_on_error']) {
+                \usleep((int) $this->options['attempts_delay']);
+
                 return $this->execute($request, ++$attempt);
             }
             throw new Exceptions\ConnectionException($e->getMessage());

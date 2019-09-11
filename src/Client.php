@@ -373,13 +373,15 @@ class Client
             $httpResponse = $this->httpClient->send($httpRequest);
             $response = $this->parserHttp($httpResponse->getBody()->getContents());
 
-            if ($response->isError() && $this->options['attempts_on_response_error'] && $attempt <= $this->options['attempts_on_error']) {
+            if ($response->isError()
+                && (bool) $this->options['attempts_on_response_error']
+                && $attempt <= (int) $this->options['attempts_on_error']) {
                 \usleep((int) $this->options['attempts_delay']);
 
                 return $this->execute($request, ++$attempt);
             }
         } catch (\Exception $e) {
-            if ($attempt <= $this->options['attempts_on_error']) {
+            if ($attempt <= (int) $this->options['attempts_on_error']) {
                 \usleep((int) $this->options['attempts_delay']);
 
                 return $this->execute($request, ++$attempt);

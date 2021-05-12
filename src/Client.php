@@ -56,10 +56,8 @@ class Client
     /**
      * Client constructor.
      *
-     * @param array|string                  $address         RPC server address string or array
-     * @param null|EventDispatcherInterface $eventDispatcher
-     * @param array                         $options
-     * @param null|Cache                    $cache
+     * @param array|string $address RPC server address string or array
+     * @param array        $options
      */
     public function __construct($address, EventDispatcherInterface $eventDispatcher = null, $options = [], Cache $cache = null)
     {
@@ -105,8 +103,6 @@ class Client
     /**
      * Set event dispatcher.
      *
-     * @param null|EventDispatcherInterface $eventDispatcher
-     *
      * @return $this
      */
     public function setEventDispatcher(EventDispatcherInterface $eventDispatcher = null)
@@ -130,8 +126,6 @@ class Client
      * Execute one RPC method without response.
      *
      * @param string $method
-     * @param array  $params
-     * @param array  $headers
      */
     public function notice($method, array $params = [], array $headers = [])
     {
@@ -149,8 +143,6 @@ class Client
      * Execute JSON-RPC method.
      *
      * @param string $method
-     * @param array  $params
-     * @param array  $headers
      *
      * @return null|JsonResponse
      */
@@ -170,10 +162,8 @@ class Client
      * Execute JSON-RPC method with cache.
      *
      * @param string      $method
-     * @param array       $params
      * @param null|string $key
      * @param int         $lifetime
-     * @param array       $headers
      *
      * @throws \Exception
      *
@@ -208,9 +198,6 @@ class Client
 
     /**
      * Create response from exception and request.
-     *
-     * @param \Exception  $e
-     * @param JsonRequest $request
      *
      * @return JsonResponse
      */

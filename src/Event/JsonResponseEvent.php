@@ -6,27 +6,14 @@ use Timiki\RpcCommon\JsonResponse;
 
 class JsonResponseEvent extends AbstractEvent
 {
-    /**
-     * @var JsonResponse
-     */
-    private $jsonResponse;
+    private JsonResponse $jsonResponse;
 
-    /**
-     * @param JsonResponse|JsonResponse[] $jsonRequests
-     * @param null                        $address
-     */
-    public function __construct($jsonRequests, $address = null)
+    public function __construct(JsonResponse $jsonRequests)
     {
         $this->jsonResponse = $jsonRequests;
-        parent::__construct($address);
     }
 
-    /**
-     * Get json response.
-     *
-     * @return JsonResponse|JsonResponse[]
-     */
-    public function getJsonResponse()
+    public function getJsonResponse(): JsonResponse
     {
         return $this->jsonResponse;
     }

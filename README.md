@@ -1,25 +1,27 @@
-Simple JSON-RPC http client
+Simple JSON-RPC Http client
 ===========================
 
 Install
 -------
 
-Add to composer from command line
+    composer require timiki/rpc-client "^4.0"
 
-    composer require timiki/rpc-client "^3.3"
-
-Or add in composer.json
-
-    "require"     : {
-        "timiki/rpc-client" : "^3.3"
-    }
-    
-    
 Options
 -------
 
-attempts_on_error (int) - Count of attempts on connection or response  error (default: 10)
+**attempts_on_error** (int) - Count of attempts on connection or response  error (default: 10)
 
-attempts_on_response_error (bool) - Attempt on response error  (default: false)
+**attempts_on_response_error** (bool) - Attempt on response error  (default: false)
 
-attempts_delay (int) - Delay in msec between attempts (default: 1000)
+**attempts_delay** (int) - Delay in msec between attempts (default: 1000)
+
+**response_on_connection_exception** (bool) - If set true client return JsonResponse on connection exception (default: true)
+
+Async
+-------
+
+JSON-RPC Http client use [guzzlehttp/promises](https://github.com/guzzle/promises) for call async function
+
+**callAsync**(string $method, array $params = [], array $headers = []): Promise
+
+**noticeAsync**(string $method, array $params = [], array $headers = []): Promise

@@ -2,6 +2,7 @@
 
 namespace Timiki\RpcClient;
 
+use GuzzleHttp\ClientInterface as HttpClientInterface;
 use GuzzleHttp\Promise\Promise;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Timiki\RpcCommon\JsonRequest;
@@ -13,6 +14,11 @@ interface ClientInterface
      * Set options.
      */
     public function setOptions(array $options = []): self;
+
+    /**
+     * Get http client.
+     */
+    public function getHttpClient(): HttpClientInterface;
 
     /**
      * Set event dispatcher.
@@ -47,5 +53,5 @@ interface ClientInterface
     /**
      * Execute json RPC request or batch requests.
      */
-    public function execute(JsonRequest $request, array $headers = []): Promise;
+    public function execute(JsonRequest $request): Promise;
 }

@@ -15,7 +15,7 @@ use Timiki\RpcCommon\JsonResponse;
  */
 class Client implements ClientInterface
 {
-    public const VERSION = '4.0.0';
+    public const VERSION = '4.0.1';
 
     /**
      * Server address.
@@ -30,20 +30,23 @@ class Client implements ClientInterface
         'attempts_on_response_error' => false,
         'attempts_delay' => 1000, // msec
         'response_on_connection_exception' => true,
-        'http_options' => [
-            'verify' => false,
-        ],
     ];
 
     private HttpClientInterface $httpClient;
     private ?EventDispatcherInterface $eventDispatcher = null;
 
-    public function __construct(string $address, array $options = [])
+    public function __construct(string $address, array $options = [], ?HttpClientInterface $httpClient = null)
     {
         $this->address = $address;
-
         $this->setOptions($options);
-        $this->httpClient = new HttpClient($this->options['http_options']);
+
+        if (null === $httpClient) {
+            $httpClient = new HttpClient([
+                'verify' => false,
+            ]);
+        }
+
+        $this->httpClient = $httpClient;
     }
 
     /**
@@ -58,6 +61,14 @@ class Client implements ClientInterface
         }
 
         return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getHttpClient(): HttpClientInterface
+    {
+        return $this->httpClient;
     }
 
     /**
@@ -92,8 +103,9 @@ class Client implements ClientInterface
     public function noticeAsync(string $method, array $params = [], array $headers = []): Promise
     {
         $request = new JsonRequest($method, $params);
+        $request->headers()->add($headers);
 
-        return $this->execute($request, $headers);
+        return $this->execute($request);
     }
 
     /**
@@ -118,11 +130,13 @@ class Client implements ClientInterface
     /**
      * {@inheritDoc}
      */
-    public function execute(JsonRequest $request, array $headers = []): Promise
+    public function execute(JsonRequest $request): Promise
     {
         if ($this->eventDispatcher) {
             $this->eventDispatcher->dispatch(new Event\JsonRequestEvent($request));
         }
+
+        $headers = $request->headers()->all();
 
         $headers['user-agent'] = $headers['user-agent'] ?? 'JSON-RPC client/'.self::VERSION.'/'.PHP_VERSION;
         $headers['content-type'] = 'application/json';

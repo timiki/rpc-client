@@ -218,12 +218,6 @@ class Client implements ClientInterface
             throw new Exceptions\InvalidResponseException('Invalid response from RPC server, must be valid json.');
         }
 
-        $error = [
-            'code' => null,
-            'message' => null,
-            'data' => null,
-        ];
-
         if (
             \is_array($json)
             & \array_key_exists('id', $json)
@@ -232,22 +226,15 @@ class Client implements ClientInterface
                 || \array_key_exists('error', $json)
             )
         ) {
-            $id = $json['id'];
-            $result = \array_key_exists('result', $json) ? $json['result'] : null;
+            $response = new JsonResponse();
+            $response->setId($json['id'] ?? null);
+            $response->setResult(\array_key_exists('result', $json) ? $json['result'] : null);
 
             if (\array_key_exists('error', $json)) {
-                $error['code'] = \array_key_exists('code', $json['error']) ? $json['error']['code'] : null;
-                $error['message'] = \array_key_exists('message', $json['error']) ? $json['error']['message'] : null;
-                $error['data'] = \array_key_exists('data', $json['error']) ? $json['error']['data'] : null;
+                $response->setErrorCode(\array_key_exists('code', $json['error']) ? $json['error']['code'] : null);
+                $response->setErrorMessage(\array_key_exists('message', $json['error']) ? $json['error']['message'] : null);
+                $response->setErrorData(\array_key_exists('data', $json['error']) ? $json['error']['data'] : null);
             }
-
-            $response = new JsonResponse();
-
-            $response->setId($id);
-            $response->setResult($result);
-            $response->setErrorCode($error['code']);
-            $response->setErrorMessage($error['message']);
-            $response->setErrorData($error['data']);
 
             return $response;
         }

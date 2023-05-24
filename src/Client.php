@@ -191,7 +191,7 @@ class Client implements ClientInterface
                             $response = new JsonResponse();
                             $response->setId($request->getId());
                             $response->setErrorMessage($e->getMessage());
-                            $response->setErrorCode($e->getCode());
+                            $response->setErrorCode(-32000);
 
                             $promise->resolve($response);
                         } else {

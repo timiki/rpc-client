@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Timiki\RpcClient;
 
 use GuzzleHttp\ClientInterface as HttpClientInterface;
@@ -23,7 +25,7 @@ interface ClientInterface
     /**
      * Set event dispatcher.
      */
-    public function setEventDispatcher(?EventDispatcherInterface $eventDispatcher): self;
+    public function setEventDispatcher(EventDispatcherInterface|null $eventDispatcher): self;
 
     /**
      * Get RPC server address.

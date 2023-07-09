@@ -1,16 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Timiki\RpcClient\Event;
 
 use Timiki\RpcCommon\JsonRequest;
 
 class JsonRequestEvent extends AbstractEvent
 {
-    private JsonRequest $jsonRequest;
-
-    public function __construct(JsonRequest $jsonRequests)
+    public function __construct(private readonly JsonRequest $jsonRequest)
     {
-        $this->jsonRequest = $jsonRequests;
     }
 
     public function getJsonRequest(): JsonRequest

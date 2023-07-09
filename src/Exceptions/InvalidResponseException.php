@@ -1,20 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Timiki\RpcClient\Exceptions;
 
-use RuntimeException;
-
-/**
- * Invalid RPC response.
- */
-class InvalidResponseException extends RuntimeException
+class InvalidResponseException extends \RuntimeException
 {
-    /**
-     * InvalidResponse constructor.
-     *
-     * @param string $message
-     */
-    public function __construct($message = 'Invalid response from RPC server')
+    public function __construct(string $message = 'Invalid response from RPC server')
     {
         parent::__construct($message);
     }

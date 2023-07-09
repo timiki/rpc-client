@@ -3,3 +3,5 @@ composer.phar
 composer.lock
 bin
 vendor
+
+.php-cs-fixer.cache

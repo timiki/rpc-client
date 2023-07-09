@@ -4,7 +4,7 @@ Simple JSON-RPC Http client
 Install
 -------
 
-    composer require timiki/rpc-client "^4.0"
+    composer require timiki/rpc-client
 
 Options
 -------

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Timiki\RpcClient;
 
 use GuzzleHttp\Client as HttpClient;
@@ -10,9 +12,6 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Timiki\RpcCommon\JsonRequest;
 use Timiki\RpcCommon\JsonResponse;
 
-/**
- * Light JSON-RPC client.
- */
 class Client implements ClientInterface
 {
     public const VERSION = '4.0.2';
@@ -35,7 +34,7 @@ class Client implements ClientInterface
     private HttpClientInterface $httpClient;
     private ?EventDispatcherInterface $eventDispatcher = null;
 
-    public function __construct(string $address, array $options = [], ?HttpClientInterface $httpClient = null)
+    public function __construct(string $address, array $options = [], HttpClientInterface $httpClient = null)
     {
         $this->address = $address;
         $this->setOptions($options);
@@ -49,9 +48,6 @@ class Client implements ClientInterface
         $this->httpClient = $httpClient;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function setOptions(array $options = []): self
     {
         foreach ($this->options as $option => $value) {
@@ -63,43 +59,28 @@ class Client implements ClientInterface
         return $this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getHttpClient(): HttpClientInterface
     {
         return $this->httpClient;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function setEventDispatcher(?EventDispatcherInterface $eventDispatcher): self
+    public function setEventDispatcher(EventDispatcherInterface|null $eventDispatcher): self
     {
         $this->eventDispatcher = $eventDispatcher;
 
         return $this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getAddress(): string
     {
         return $this->address;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function notice(string $method, array $params = [], array $headers = []): void
     {
         $this->noticeAsync($method, $params, $headers)->wait();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function noticeAsync(string $method, array $params = [], array $headers = []): Promise
     {
         $request = new JsonRequest($method, $params);
@@ -108,17 +89,11 @@ class Client implements ClientInterface
         return $this->execute($request);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function call(string $method, array $params = [], array $headers = []): JsonResponse
     {
         return $this->callAsync($method, $params, $headers)->wait();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function callAsync(string $method, array $params = [], array $headers = []): Promise
     {
         $request = new JsonRequest($method, $params, uniqid(gethostname().'.', true));
@@ -127,9 +102,6 @@ class Client implements ClientInterface
         return $this->execute($request);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function execute(JsonRequest $request): Promise
     {
         if ($this->eventDispatcher) {
@@ -207,10 +179,7 @@ class Client implements ClientInterface
         return $processRequest($httpRequest);
     }
 
-    /**
-     * Parser http response.
-     */
-    protected function parserHttp(string $http): JsonResponse
+    private function parserHttp(string $http): JsonResponse
     {
         $json = json_decode($http, true);
 

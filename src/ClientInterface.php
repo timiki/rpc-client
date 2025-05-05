@@ -25,7 +25,7 @@ interface ClientInterface
     /**
      * Set event dispatcher.
      */
-    public function setEventDispatcher(EventDispatcherInterface|null $eventDispatcher): self;
+    public function setEventDispatcher(?EventDispatcherInterface $eventDispatcher): self;
 
     /**
      * Get RPC server address.

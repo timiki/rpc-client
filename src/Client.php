@@ -34,7 +34,7 @@ class Client implements ClientInterface
     private HttpClientInterface $httpClient;
     private ?EventDispatcherInterface $eventDispatcher = null;
 
-    public function __construct(string $address, array $options = [], HttpClientInterface $httpClient = null)
+    public function __construct(string $address, array $options = [], ?HttpClientInterface $httpClient = null)
     {
         $this->address = $address;
         $this->setOptions($options);
@@ -64,7 +64,7 @@ class Client implements ClientInterface
         return $this->httpClient;
     }
 
-    public function setEventDispatcher(EventDispatcherInterface|null $eventDispatcher): self
+    public function setEventDispatcher(?EventDispatcherInterface $eventDispatcher): self
     {
         $this->eventDispatcher = $eventDispatcher;
 
